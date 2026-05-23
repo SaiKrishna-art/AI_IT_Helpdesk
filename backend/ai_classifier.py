@@ -1,4 +1,4 @@
-import google.generativeai as genai
+from google import genai
 import os
 from dotenv import load_dotenv
 import json
@@ -6,14 +6,12 @@ import json
 load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=api_key)
-
-model = genai.GenerativeModel("gemini-2.5-flash")
+client = genai.Client(api_key=api_key)
 
 def analyze_ticket(ticket_text):
     prompt = f"""
 You are an IT helpdesk AI assistant.
-Analyze the IT support issue below and return ONLY a valid JSON object. 
+Analyze the IT support issue below and return ONLY a valid JSON object.
 No explanation. No markdown. No extra text. Just the JSON.
 
 Required fields:
@@ -25,7 +23,10 @@ Required fields:
 Issue:
 {ticket_text}
 """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
     text = response.text.strip()
     text = text.replace("```json", "").replace("```", "").strip()
     return json.loads(text)
